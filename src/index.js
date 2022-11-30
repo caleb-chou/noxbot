@@ -9,7 +9,7 @@ const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder, ActionRowBu
 const client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 client.on('ready', () => {
-	console.log(`Logged in as ${client.user.tag}`)
+	console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} Logged in as ${client.user.tag}`)
 });
 
 client.login(auth.BOT_TOKEN)
@@ -22,10 +22,10 @@ for (const file of commandFiles) {
 	const command = require(filePath);
 
 	if ('data' in command && 'execute' in command) {
-		console.log(`[DEBUG] Loaded command '${command.data.name}'`)
+		console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [DEBUG] Loaded command '${command.data.name}'`)
 		client.commands.set(command.data.name, command);
 	} else {
-		console.log(`[WARN] The command at ${filePath} is missing 'data' and/or 'execute'`);
+		console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [WARN] The command at ${filePath} is missing 'data' and/or 'execute'`);
 	}
 }
 
@@ -66,6 +66,8 @@ client.on(Events.InteractionCreate, async interaction => {
 	const command = client.commands.get(interaction.commandName);
 
 	if (!command) return;
+
+	console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [DEBUG] ${interaction.member.user.tag} Executed '${interaction.commandName}'`);
 
 	try {
 		await command.execute(interaction);

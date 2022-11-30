@@ -43,17 +43,22 @@ module.exports = {
             case 2: color = 0xFF0000; break;
             default: color = 0x000000; break;
         }
-        let question_field = {name: 'Question', value: interaction.options.getString('question')} ?? {}
         const embed = new EmbedBuilder()
             .setColor(color)
-            .setTitle(`🎱 says...`)
-            .addFields(
-                question_field,
+            .setTitle(`🎱 says...`);
+        if (interaction.options.getString('question')) {
+            embed.addFields(
                 {
-                    name: 'Answer',
-                    value: result[0]
+                    name: 'Question',
+                    value: interaction.options.getString('question')
                 }
             );
+        }
+        embed.addFields(
+            {
+                name: 'Answer',
+                value: result[0]
+            })
         await interaction.reply({
             content: '🎱',
             embeds: [embed],
