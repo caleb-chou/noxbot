@@ -30,6 +30,12 @@ for (const file of commandFiles) {
 }
 
 client.on(Events.InteractionCreate, async interaction => {
+	const command = client.commands.get(interaction.commandName);
+
+	if (!command) return;
+
+	console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [DEBUG] ${interaction.member.user.tag} Executed '${interaction.commandName}'`);
+
 	if (interaction.isButton()) {
 		if (interaction.customId === 'likebutton') {
 			const embed = EmbedBuilder.from(interaction.message.embeds[0]);
@@ -61,13 +67,15 @@ client.on(Events.InteractionCreate, async interaction => {
 			}
 		}
 	}
+	if (interaction.isContextMenuCommand()) {
+		try {
+			await command.execute(interaction);
+		} catch (error) {
+			console.error(error);
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
 	if (!interaction.isChatInputCommand()) return;
-
-	const command = client.commands.get(interaction.commandName);
-
-	if (!command) return;
-
-	console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [DEBUG] ${interaction.member.user.tag} Executed '${interaction.commandName}'`);
 
 	try {
 		await command.execute(interaction);
