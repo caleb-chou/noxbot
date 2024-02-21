@@ -29,20 +29,23 @@ for (const file of commandFiles) {
 	}
 }
 
-client.on(Events.InteractionCreate, async interaction => {
-	const command = client.commands.get(interaction.commandName);
+var data = new Map();
 
-	if (!command) return;
+client.on(Events.InteractionCreate, async interaction => {
 
 	console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [DEBUG] ${interaction.member.user.tag} Executed '${interaction.commandName}'`);
 
 	if (interaction.isButton()) {
 		if (interaction.customId === 'likebutton') {
+			if(!data.has(interaction.message.id)) data.set(interaction.message.id , new Set());
+			var message_set = data.get(interaction.message.id);
+			if (message_set.has(interaction.member.user.tag)) message_set.delete(interaction.member.user.tag);
+			else message_set.add(interaction.member.user.tag);
 			const embed = EmbedBuilder.from(interaction.message.embeds[0]);
 			// console.log(embed);
 			var likes = embed.data.footer.text;//replace(/^D+/g, '');
 			// console.log(likes);
-			embed.setFooter({text: `${parseInt(likes) + 1} Likes`})
+			embed.setFooter({text: `${message_set.size} Likes`})
 			await interaction.update({embeds : [embed]})
 		}
 		if (interaction.customId === 'pumpitup') {
@@ -67,6 +70,10 @@ client.on(Events.InteractionCreate, async interaction => {
 			}
 		}
 	}
+	
+	const command = client.commands.get(interaction.commandName);
+	if (!command) return;
+
 	if (interaction.isContextMenuCommand()) {
 		try {
 			await command.execute(interaction);
