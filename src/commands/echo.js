@@ -12,7 +12,7 @@ module.exports = {
             .setName('channel')
             .setDescription('Channel to echo message in')),
     async execute(interaction) {
-        let channel = interaction.options.getChannel('channel');
+        let channel = interaction.options.getChannel('channel') ?? interaction.channel;
         
         await channel.send({content: `${interaction.options.getString('phrase')}`})
         await interaction.reply({content: `Echoed '${interaction.options.getString('phrase')}'`, ephemeral: true});

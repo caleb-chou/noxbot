@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path')
-var seedrandom = require('seedrandom');
 const auth = JSON.parse(fs.readFileSync('auth/d.json'));
 
 const commandPath = 'src/commands';
@@ -33,12 +32,12 @@ var data = new Map();
 
 client.on(Events.InteractionCreate, async interaction => {
 
-	console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [DEBUG] ${interaction.member.user.tag} Executed '${interaction.commandName}'`);
+	console.log(`${new Date().toLocaleTimeString('en-US', { hour12: false })} [DEBUG] ${interaction.member.user.tag} Executed '${interaction.commandName ?? interaction.customId}'`);
 
 	if (interaction.isButton()) {
 		if (interaction.customId === 'likebutton') {
 			if(!data.has(interaction.message.id)) data.set(interaction.message.id , new Set());
-			var message_set = data.get(interaction.message.id);
+			let message_set = data.get(interaction.message.id);
 			if (message_set.has(interaction.member.user.tag)) message_set.delete(interaction.member.user.tag);
 			else message_set.add(interaction.member.user.tag);
 			const embed = EmbedBuilder.from(interaction.message.embeds[0]);
@@ -50,16 +49,22 @@ client.on(Events.InteractionCreate, async interaction => {
 		}
 		if (interaction.customId === 'pumpitup') {
 			var pumps = parseInt(interaction.component.label);
-			const rng = seedrandom(interaction.message.createdTimestamp);
-			if(pumps > parseInt(rng() * 100) + 1) {
+			if((Math.random() * pumps) > Math.random() * 100) {
 				const new_embed = new EmbedBuilder()
 					.setColor(0xFF0000)
 					.setTitle('The balloon popped!')
-					.setDescription(`${interaction.member.displayName} popped the balloon after ${pumps} pumps!`)
-				await interaction.update({content:'💥', embeds : [new_embed], components : []})
+					.setDescription(`${interaction.member.displayName} popped the balloon after ${pumps} pumps!`);
+				
+				await interaction.update({content:'💥', embeds : [new_embed], components : []});
 				
 			} else {		
 				const new_button = ButtonBuilder.from(interaction.component);
+				
+				if(!data.has(interaction.message.id)) data.set(interaction.message.id, new Map());
+				let message_map = data.get(interaction.message.id);
+				
+				if(message_map.has(interaction.member.user.tag)) message_map.set(interaction.member.user.tag, message_map.get(interaction.member.user.tag) + 1);
+				else message_map.set(interaction.member.user.tag, 1);
 
 				new_button.setLabel(`${pumps + 1} Pump(s)`)
 				await interaction.update({components: [
